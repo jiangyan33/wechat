@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "start": "NOOD_DEV=development node ./app.js"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.3",
+    "body-parser": "^1.18.3",
+    "config": "^3.0.1",
+    "express": "^4.16.4",
+    "request": "^2.88.0",
+    "sha1": "^1.1.1"
+  }
+}
