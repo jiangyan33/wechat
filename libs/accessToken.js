@@ -1,4 +1,4 @@
-const request = require('./method');
+const { request } = require('./method');
 const config = require('config');
 const path = require('path');
 const fs = require('fs');
@@ -11,15 +11,11 @@ class AccessToken {
     }
 
     async  getAccessToken() {
-        let data = fs.readFileSync(path.join(__dirname, '../config/data.json'));
-        if (this.isValidAccessToken(data)) {
+        let data = fs.readFileSync(path.join(__dirname, '../config/data.json')).toString();
+        if (this.isValidAccessToken(JSON.parse(data))) {
             return data;
         }
         await this.updateAccessToken();
-    }
-
-    saveAccessToken(data) {
-        fs.writeFileSync(path.join(__dirname, '../config/data.json'), JSON.stringify(data));
     }
 
     isValidAccessToken(data) {
@@ -39,7 +35,7 @@ class AccessToken {
         let data = response.body;
         let now = new Date().getTime();
         data.expires_in = (data.expires_in - 20) * 1000 + now;
-        this.saveAccessToken(data);
+        fs.writeFileSync(path.join(__dirname, '../config/data.json'), JSON.stringify(data));
     }
 }
 
