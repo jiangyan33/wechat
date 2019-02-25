@@ -1,11 +1,7 @@
 const Promise = require('bluebird');
 const request = require('request');
 const parseString = require('xml2js').parseString;
-module.exports = {
-    request: Promise.promisify(request),
-    parseXML: Promise.promisify(parseString),
-    formatMessage
-}
+const { compiled } = require('./tmp');
 
 function formatMessage(result) {
     let message = {};
@@ -45,5 +41,23 @@ function formatMessage(result) {
     }
     return message;
 }
-
-
+function tmp(content, message) {
+    let info = {};
+    let type = 'text';
+    if (conent instanceof Array) {
+        types = 'news';
+    }
+    type = content.type || type;
+    info.conent = content;
+    info.createTime = new Date().getTime();
+    info.msgType = type;
+    info.toUserName = message.fromUserName;
+    info.fromUserName = message.toUserName;
+    return compiled(info);
+}
+module.exports = {
+    request: Promise.promisify(request),
+    parseXML: Promise.promisify(parseString),
+    formatMessage,
+    tmp
+}
