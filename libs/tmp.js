@@ -7,19 +7,19 @@ let tmp = heredoc(function () {/*
         <FromUserName><![CDATA[<%= fromUserName %>]]></FromUserName>
         <CreateTime><%= createTime %></CreateTime>
         <MsgType><![CDATA[<%= msgType %>]]></MsgType>
-        <%= if (msgType === 'text'){ %>
+        <% if (msgType === 'text'){ %>
             <Content><![CDATA[<%= content %>]]></Content>
-        <%= } else if (msgType === 'image'||msgType === 'voice'){ %>
+        <% } else if (msgType === 'image'||msgType === 'voice'){ %>
             <Image>
                 <MediaId><![CDATA[<%= content.mediaId %>]]></MediaId>
             </Image>
-        <%= } else if (msgType === 'video'){ %>
+        <% } else if (msgType === 'video'){ %>
             <Video>
                 <MediaId><![CDATA[<%= content.mediaId %>]]></MediaId>
                 <Title><![CDATA[<%= content.title %>]]></Title>
                 <Description><![CDATA[<%= content.description %>]]></Description>
             </Video>
-        <%= } else if (msgType === 'music'){ %>
+        <% } else if (msgType === 'music'){ %>
             <Music>
                 <Title><![CDATA[<%= content.title %>]]></Title>
                 <Description><![CDATA[<%= content.description %>]]></Description>
@@ -27,22 +27,21 @@ let tmp = heredoc(function () {/*
                 <HQMusicUrl><![CDATA[<%= content.hqMusicUrl %>]]></HQMusicUrl>
                 <ThumbMediaId><![CDATA[<%= content.thumbMediaId %>]]></ThumbMediaId>
             </Music>
-        <%= } else{ %>
+        <% } else{ %>
             <ArticleCount><%= content.length %></ArticleCount>
             <Articles>
-                <%= content.foreach((item)=>{ %>
+                <% content.forEach((item)=>{ %>
                     <item>
                     <Title><![CDATA[<%= item.title %>]]></Title>
                     <Description><![CDATA[<%= item.description %>]]></Description>
                     <PicUrl><![CDATA[<%= item.picUrl %>]]></PicUrl>
                     <Url><![CDATA[<%= item.url %>]]></Url>
                     </item>
-                <%= }) %>
+                <% }) %>
             </Articles>
-        <%= } %>
+        <% } %>
     </xml>
      */ });
-let compiled = await ejs.compile(tmp, true);
 module.exports = {
-    compiled
+    compiled: ejs.compile(tmp)
 }

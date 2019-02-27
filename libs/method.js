@@ -41,18 +41,19 @@ function formatMessage(result) {
     }
     return message;
 }
+//生成相应的参数
 function tmp(content, message) {
     let info = {};
     let type = 'text';
-    if (conent instanceof Array) {
-        types = 'news';
+    if (content instanceof Array) {
+        type = 'news';
     }
     type = content.type || type;
-    info.conent = content;
+    info.content = content;
     info.createTime = new Date().getTime();
     info.msgType = type;
-    info.toUserName = message.fromUserName;
-    info.fromUserName = message.toUserName;
+    info.toUserName = message.FromUserName;
+    info.fromUserName = message.ToUserName;
     return compiled(info);
 }
 module.exports = {
