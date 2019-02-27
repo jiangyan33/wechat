@@ -13,9 +13,9 @@ class AccessToken {
     async  getAccessToken() {
         let data = fs.readFileSync(path.join(__dirname, '../config/data.json')).toString();
         if (this.isValidAccessToken(JSON.parse(data))) {
-            return data;
+            return JSON.parse(data).access_token;
         }
-        await this.updateAccessToken();
+        return await this.updateAccessToken();
     }
 
     isValidAccessToken(data) {
@@ -36,6 +36,18 @@ class AccessToken {
         let now = new Date().getTime();
         data.expires_in = (data.expires_in - 20) * 1000 + now;
         fs.writeFileSync(path.join(__dirname, '../config/data.json'), JSON.stringify(data));
+        return data['access_token'];
+    }
+
+    //上传素材
+    async  uploadTemp(type, filePath) {
+        let access_token = await this.getAccessToken();
+        let url = `${config.get('app').preix}media/upload?access_token=${access_token}&type=${type}`;
+        let formData = {
+            media: fs.createReadStream(filePath)
+        };
+        let response = await request({ method: 'POST', url, formData, json: true });
+        return response.body;
     }
 }
 

@@ -56,6 +56,7 @@ function tmp(content, message) {
     info.fromUserName = message.ToUserName;
     return compiled(info);
 }
+
 module.exports = {
     request: Promise.promisify(request),
     parseXML: Promise.promisify(parseString),

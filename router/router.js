@@ -1,9 +1,10 @@
 const router = require('express').Router();
 const config = require('config');
 const sha1 = require('sha1');
-const accessToken = require('../libs/accessToken');
 const weChat = require('../libs/weChat');
 const { tmp } = require('../libs/method');
+const path = require('path');
+const accessToken = require('../libs/accessToken');
 
 router.get('/', (req, res) => {
     let { signature, timestamp, nonce, echostr } = req.query;
@@ -15,27 +16,35 @@ router.get('/', (req, res) => {
 router.post('/', async (req, res) => {
     let message = await weChat.mxlToObject(req.body.toString());
     console.log(message);
+    let response = undefined;
     let content = undefined;
     if (message.MsgType === 'event') {
-        if (message.Event === 'subscribe') {
-            if (message.EventKey) {
+        switch (message.Event) {
+            case 'subscribe':
                 console.log(`扫描二维码进来:${message.EventKey} ${message.Ticket}`);
-            }
-            content = '哈哈，很高兴认识你，希望你每天开心快乐!';
-        } else if (message.Event === 'unsubscribe') {
-            console.log('无情取关!');
-            return;
-        } else if (message.Event === 'LOCATION') {
-            content = `您上报的地理位置为：${message.Latitude}/${message.Longitude}-${message.Precision}`;
-
-        } else if (message.Event === 'CLICK') {
-            content = `您点击了菜单:${message.EventKey}`;
-        } else if (message.Event === 'SCAN') {
-            console.log(`您关注后扫描了二维码:${message.EventKey} ${message.Ticket}`);
-            content = '看到您扫了一下哦';
-
-        } else if (message.Event === 'VIEW') {
-            content = `您点击了菜单中的链接：${message.EventKey}`;
+                content = '哈哈，很高兴认识你，希望你每天开心快乐!';
+                break;
+            case 'unsubscribe':
+                console.log('无情取关!');
+                return;
+            case 'LOCATION':
+                if (message.EventKey) {
+                    console.log(`扫描二维码进来:${message.EventKey} ${message.Ticket}`);
+                }
+                content = '哈哈，很高兴认识你，希望你每天开心快乐!';
+                break;
+            case 'CLICK':
+                content = `您点击了菜单:${message.EventKey}`;
+                break;
+            case 'SCAN':
+                console.log(`您关注后扫描了二维码:${message.EventKey} ${message.Ticket}`);
+                content = '看到您扫了一下哦';
+                break;
+            case 'VIEW':
+                content = `您点击了菜单中的链接：${message.EventKey}`;
+                break;
+            default:
+                break;
         }
     } else if (message.MsgType === 'text') {
         let _content = message.Content;
@@ -58,6 +67,22 @@ router.post('/', async (req, res) => {
                 picUrl: "https://avatars3.githubusercontent.com/u/35300813?v=4&s=120",
                 url: "https://cnodejs.org/"
             }];
+                break;
+            case '5':
+                response = await accessToken.uploadTemp('image', path.join(__dirname, '../public/image/3.jpg'));
+                content = {
+                    type: 'image',
+                    mediaId: response.media_id
+                };
+                break;
+            case '6':
+                response = await accessToken.uploadTemp('video', path.join(__dirname, '../public/video/1.mp4'));
+                content = {
+                    type: 'video',
+                    title: '导读',
+                    description: '第一章，nodejs开发微信公众号介绍',
+                    mediaId: response.media_id
+                };
                 break;
             default:
                 content = `额，你说的【${message.Content}】太复杂了!`
