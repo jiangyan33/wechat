@@ -2,7 +2,18 @@ const { request } = require('./method');
 const config = require('config');
 const path = require('path');
 const fs = require('fs');
-
+const preix = config.get('app').preix;
+const api = {
+    accessToken: `${preix}token?`,
+    temporary: {
+        upload: `${preix}media/upload?`
+    },
+    permanent: {
+        upload: `${preix}material/add_material?`,
+        uploadNews: `${preix}material/add_news?`,
+        uploadNewsPic: `${preix}material/uploadimg?`
+    }
+}
 
 class AccessToken {
     constructor(opt) {
@@ -30,7 +41,7 @@ class AccessToken {
     }
 
     async  updateAccessToken() {
-        let url = `${config.app.preix}token?grant_type=client_credential&appid=${this.appID}&secret=${this.appsecret}`;
+        let url = `${api.accessToken}grant_type=client_credential&appid=${this.appID}&secret=${this.appsecret}`;
         let response = await request({ url, json: true });
         let data = response.body;
         let now = new Date().getTime();
@@ -40,13 +51,28 @@ class AccessToken {
     }
 
     //上传素材
-    async  uploadTemp(type, filePath) {
+    async  uploadMaterials(type, material, permanent) {
         let access_token = await this.getAccessToken();
-        let url = `${config.get('app').preix}media/upload?access_token=${access_token}&type=${type}`;
-        let formData = {
-            media: fs.createReadStream(filePath)
-        };
-        let response = await request({ method: 'POST', url, formData, json: true });
+        let form = {};
+        //默认素材为临时素材
+        let uploadUrl = api.temporary.upload;
+        //如果上传的为永久素材，图片,语音,视频，缩略图，
+        if (permanent) {
+            //修改上传的url地址
+            uploadUrl = api.permanent.upload;
+            //重新赋值form
+            form = permanent;
+        }
+        //如果素材类型为pic，作为图文消息的图片上传，返回的是一个图片的url地址
+        if (type === 'pic') {
+            uploadUrl = api.permanent.uploadNewsPic;
+        }
+        //如果素材类型为图文消息
+        type === 'news' ? uploadUrl = api.permanent.uploadNews : form.media = fs.createReadStream(material);
+        let url = `${uploadUrl}access_token=${access_token}&type=${type}`;
+        let options = { method: 'POST', url, json: true };
+        type === 'news' ? options.body = form : options.formData = form;
+        let response = await request(options);
         return response.body;
     }
 }

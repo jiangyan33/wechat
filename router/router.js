@@ -69,14 +69,45 @@ router.post('/', async (req, res) => {
             }];
                 break;
             case '5':
-                response = await accessToken.uploadTemp('image', path.join(__dirname, '../public/image/3.jpg'));
+                response = await accessToken.uploadMaterials('image', path.join(__dirname, '../public/image/3.jpg'));
                 content = {
                     type: 'image',
                     mediaId: response.media_id
                 };
                 break;
             case '6':
-                response = await accessToken.uploadTemp('video', path.join(__dirname, '../public/video/1.mp4'));
+                response = await accessToken.uploadMaterials('video', path.join(__dirname, '../public/video/1.mp4'));
+                content = {
+                    type: 'video',
+                    title: '导读',
+                    description: '第一章，nodejs开发微信公众号介绍',
+                    mediaId: response.media_id
+                };
+                break;
+            case '7':
+                //上传图片作为音乐封面信息
+                response = await accessToken.uploadMaterials('image', path.join(__dirname, '../public/image/4.jpg'));
+                content = {
+                    type: 'music',
+                    title: '传奇--王菲',
+                    description: `只是因为在人群中多看了你一眼
+                                  再也没能忘掉你容颜`,
+                    musicUrl: 'http://fs.w.kugou.com/201902281131/7d33fe2254776f082d56bbe3645cdb39/G003/M07/06/15/o4YBAFT598uAASz9AEhIQDR59S8377.mp3',
+                    thumbMediaId: response.media_id
+                };
+                break;
+            case '8':
+                //上传永久图片
+                response = await accessToken.uploadMaterials('image', path.join(__dirname, '../public/image/5.jpg'), {});
+                content = {
+                    type: 'image',
+                    mediaId: response.media_id
+                };
+                break;
+            case '9':
+                response = await accessToken.uploadMaterials('video', path.join(__dirname, '../public/video/1.mp4'), {
+                    description: `{"title":"导读","introduction":"第一章，nodejs开发微信公众号介绍"}`
+                });
                 content = {
                     type: 'video',
                     title: '导读',
