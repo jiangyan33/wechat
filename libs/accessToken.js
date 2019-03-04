@@ -6,12 +6,18 @@ const preix = config.get('app').preix;
 const api = {
     accessToken: `${preix}token?`,
     temporary: {
-        upload: `${preix}media/upload?`
+        upload: `${preix}media/upload?`,
+        fetch: `${preix}media/get?`,
     },
     permanent: {
         upload: `${preix}material/add_material?`,
         uploadNews: `${preix}material/add_news?`,
-        uploadNewsPic: `${preix}material/uploadimg?`
+        uploadNewsPic: `${preix}material/uploadimg?`,
+        fetch: `${preix}material/get_material?`,
+        del: `${preix}material/del_material?`,
+        updateNews: `${preix}material/update_news?`,
+        count: `${preix}material/get_materialcount?`,
+        batch: `${preix}material/batchget_material?`
     }
 }
 
@@ -56,7 +62,7 @@ class AccessToken {
         let form = {};
         //默认素材为临时素材
         let uploadUrl = api.temporary.upload;
-        //如果上传的为永久素材，图片,语音,视频，缩略图，
+        //如果上传的为永久素材，图片,语音,视频，缩略图，图文消息
         if (permanent) {
             //修改上传的url地址
             uploadUrl = api.permanent.upload;
@@ -67,11 +73,106 @@ class AccessToken {
         if (type === 'pic') {
             uploadUrl = api.permanent.uploadNewsPic;
         }
-        //如果素材类型为图文消息
+        //如果不是图文素材，post请求体中需要media参数
         type === 'news' ? uploadUrl = api.permanent.uploadNews : form.media = fs.createReadStream(material);
         let url = `${uploadUrl}access_token=${access_token}&type=${type}`;
         let options = { method: 'POST', url, json: true };
+        //如果不是图文素材需要formData(存储媒体数据)
         type === 'news' ? options.body = form : options.formData = form;
+        let response = await request(options);
+        return response.body;
+    }
+
+    //获取素材
+    async fetchMaterials(media_id, type, permanent) {
+        let access_token = await this.getAccessToken();
+        //初始化url为临时素材的url
+        let fetchUrl = permanent ? api.permanent.fetch : api.temporary.fetch;
+        //请求的url
+        let url = `${fetchUrl}access_token=${access_token}&media_id=${media_id}`;
+        //如果素材类型为video
+        let options = {
+            method: 'GET',
+            json: true,
+        }
+        //如果为永久素材
+        if (permanent) {
+            options['method'] = 'POST';
+            options['url'] = url;
+            options['body'] = {
+                media_id
+            }
+            //如果为临时素材，并且type为video，修改url
+        } else if (type === 'video') {
+            //临时素材的video格式的视频，需要使用http方式访问,为get请求，永久素材使用post请求方式
+            options['url'] = url.replace('https://', 'http://');
+        }
+        let response = await request(options);
+        return response.body;
+    }
+
+    //删除永久素材
+    async fetchMaterials(media_id) {
+        let access_token = await this.getAccessToken();
+        //请求的url
+        let url = `${api.permanent.del}access_token=${access_token}`;
+        //如果素材类型为video
+        let options = {
+            method: 'POST',
+            json: true,
+            url,
+            body: {
+                media_id
+            }
+        };
+        let response = await request(options);
+        return response.body;
+    }
+
+    //修改图文素材
+    async updateNewsMaterials(media_id, index, articles) {
+        let access_token = await this.getAccessToken();
+        //请求的url
+        let url = `${api.permanent.updateNews}access_token=${access_token}`;
+        //如果素材类型为video
+        let options = {
+            method: 'POST',
+            url,
+            json: true,
+            body: {
+                media_id,
+                index,
+                articles
+            }
+        };
+        let response = await request(options);
+        return response.body;
+    }
+
+    //获取素材总数
+    async count() {
+        let access_token = await this.getAccessToken();
+        //请求的url
+        let url = `${api.permanent.count}access_token=${access_token}`;
+        let response = await request({ method: 'GET', url, json: true });
+        return response.body;
+    }
+
+    //获取素材列表
+    async batch(type = 'image', offset = 0, count = 10) {
+        let access_token = await this.getAccessToken();
+        //请求的url
+        let url = `${api.permanent.batch}access_token=${access_token}`;
+        let options = {
+            method: 'POST',
+            url,
+            json: true,
+            body: {
+                type,
+                offset,
+                count
+            }
+        };
         let response = await request(options);
         return response.body;
     }

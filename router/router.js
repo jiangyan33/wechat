@@ -18,6 +18,7 @@ router.post('/', async (req, res) => {
     console.log(message);
     let response = undefined;
     let content = undefined;
+    let temp = undefined;
     if (message.MsgType === 'event') {
         switch (message.Event) {
             case 'subscribe':
@@ -97,13 +98,14 @@ router.post('/', async (req, res) => {
                 };
                 break;
             case '8':
-                //上传永久图片
+                //上传永久图片，回复用户图片消息
                 response = await accessToken.uploadMaterials('image', path.join(__dirname, '../public/image/5.jpg'), {});
                 content = {
                     type: 'image',
                     mediaId: response.media_id
                 };
                 break;
+            //上传永久视频素材，回复用户视频消息
             case '9':
                 response = await accessToken.uploadMaterials('video', path.join(__dirname, '../public/video/1.mp4'), {
                     description: `{"title":"导读","introduction":"第一章，nodejs开发微信公众号介绍"}`
@@ -114,6 +116,40 @@ router.post('/', async (req, res) => {
                     description: '第一章，nodejs开发微信公众号介绍',
                     mediaId: response.media_id
                 };
+                break;
+            //上传图文素材，然后返回
+            case '10':
+                //先上传永久图片
+                temp = await accessToken.uploadMaterials('image', path.join(__dirname, '../public/image/5.jpg'), {});
+                content = {
+                    "articles": [{
+                        "title": '图文消息标题',
+                        "thumb_media_id": temp.media_id,
+                        "author": 'jiangyan',
+                        "digest": '测试摘要信息',
+                        "show_cover_pic": 1,
+                        "content": '测试内容信息',
+                        "content_source_url": 'www.baidu.com',
+                        "need_open_comment": 1,
+                        "only_fans_can_comment": 1
+                    }
+                        //若新增的是多图文素材，则此处应还有几段articles结构
+                    ]
+                };
+                //上传永久图文素材
+                response = await accessToken.uploadMaterials('news', content, {});
+                //根据返回的素材id获取图文素材内容
+                response = await accessToken.fetchMaterials(response.media_id, 'news', {});
+                //设置回复内容
+                content = [];
+                response.news_item.forEach(it => {
+                    content.push({
+                        title: it.title,
+                        description: it.description,
+                        picUrl: temp.url,
+                        url: it.url
+                    })
+                });
                 break;
             default:
                 content = `额，你说的【${message.Content}】太复杂了!`
