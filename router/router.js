@@ -6,6 +6,9 @@ const { tmp } = require('../libs/method');
 const path = require('path');
 const temporary = require('../libs/temporary');
 const permanent = require('../libs/permanent');
+const tag = require('../libs/tag');
+const userManage = require('../libs/userManage');
+
 
 // const accessToken = require('../libs/accessToken');
 
@@ -161,6 +164,52 @@ router.post('/', async (req, res) => {
                 }
                 //若新增的是多图文素材，则此处应还有几段articles结构
                 response = await permanent.updateNewsMaterials('fKAtaphUUoGswdfJ8xVXDj14t2aRrA9dz4ogE-IdHBs', 0, temp);
+                console.log(JSON.stringify(response));
+                break;
+            case '12':
+                //测试标签
+                // response = await tag.get();
+                // console.log(JSON.stringify(response));
+                //{"tags":[{"id":2,"name":"星标组","count":0}]}
+
+                // response = await tag.getUserTags('osck56IGPNFlSEGUkXhRDy1v1plM');
+                // console.log(JSON.stringify(response));
+                //{"tagid_list":[]}
+
+                //创建标签
+
+                // response = await tag.create('北京');
+                // console.log(JSON.stringify(response));
+                // {"tag":{"id":100,"name":"北京"}}
+
+                //  修改标签
+                // response = await tag.update(100, '中国');
+                // console.log(JSON.stringify(response));
+
+                //删除标签
+                // response = await tag.del(100);
+                // console.log(JSON.stringify(response));
+
+                //为用户添加标签
+                response = await tag.userTags(['osck56IGPNFlSEGUkXhRDy1v1plM'], 2, 1);
+                console.log(JSON.stringify(response));
+
+                //测试标签
+                response = await tag.get();
+                console.log(JSON.stringify(response));
+
+                break;
+            case '13':
+                // response = await userManage.batchFetchUserList();
+                // console.log(JSON.stringify(response));
+                temp = {
+                    user_list:
+                        [{
+                            openid: 'osck56IGPNFlSEGUkXhRDy1v1plM',
+                            lang: "zh_CN"
+                        }]
+                }
+                response = await userManage.batchFetchUserInfo(temp);
                 console.log(JSON.stringify(response));
                 break;
             default:
