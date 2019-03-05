@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const config = require('config');
 const http = require('http');
 const router = require('./router/router');
-const accessToken = require('./libs/accessToken');
+const { accessToken } = require('./libs/accessToken');
 
 (async () => {
     const app = express();
