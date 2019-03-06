@@ -8,6 +8,7 @@ const temporary = require('../libs/temporary');
 const permanent = require('../libs/permanent');
 const tag = require('../libs/tag');
 const userManage = require('../libs/userManage');
+const messageManage = require('../libs/message');
 
 
 // const accessToken = require('../libs/accessToken');
@@ -83,10 +84,10 @@ router.post('/', async (req, res) => {
                 //     mediaId: response.media_id
                 //     // mediaId: "2O3D8apoZXiJYH3A9hnvzPlWLm4oY2UNn_PUjTu8NyeEO6x1-TlbRbzNqiiY-8K-"
                 // };
-                console.log(JSON.stringify(response));
+                // console.log(JSON.stringify(response));
                 // response = await temporary.fetchMaterials(content.mediaId);
                 // response = await temporary.fetchMaterials('aznAo72yCr0NgHTeRb11bVN3Qqjyr6WjCoyugRX8Jxn9L4a7NIf7-xS4oTG6BquE');
-                // console.log(JSON.stringify(response));
+                console.log(JSON.stringify(response));
                 break;
             case '6':
                 //  测试上传永久素材
@@ -148,7 +149,7 @@ router.post('/', async (req, res) => {
             case '10':
                 //获取素材列表
                 //先上传永久图片
-                response = await permanent.batch('video', 0, 10);
+                response = await permanent.batch('image', 0, 10);
                 console.log(JSON.stringify(response));
                 break;
             case '11':
@@ -191,7 +192,7 @@ router.post('/', async (req, res) => {
                 // console.log(JSON.stringify(response));
 
                 //为用户添加标签
-                response = await tag.userTags(['osck56IGPNFlSEGUkXhRDy1v1plM'], 2, 1);
+                response = await tag.userTags(['osck56IGPNFlSEGUkXhRDy1v1plM'], 2);
                 console.log(JSON.stringify(response));
 
                 //测试标签
@@ -212,9 +213,120 @@ router.post('/', async (req, res) => {
                 response = await userManage.batchFetchUserInfo(temp);
                 console.log(JSON.stringify(response));
                 break;
+            case '14':
+                //  测试上传永久素材
+                // response = await permanent.uploadMaterials('thumb', path.join(__dirname, '../public/thumb/yifu.jpg'));
+                //fKAtaphUUoGswdfJ8xVXDnwfrVuYzDIfQqNdRgBlNdY
+                temp = {
+                    "articles": [{
+                        "thumb_media_id": "aAPbQ0m27Vf_7BKEx9ixtQujTGlDUcWr54sKWbeotOz3Fd1fqf_S1HKpahrIjJNG",
+                        "author": 'jiangyan',
+                        "title": 'js中bind方法的使用',
+                        "content_source_url": 'http://62.234.108.185:3000/',
+                        "content": `<h2 id="h2-u6982u8FF0"><a name="概述" class="reference-link"></a><span class="header-link octicon octicon-link"></span>概述</h2><blockquote>
+                        <p>javascript语言中有String,Number,Date,Regex,Array,Object,Symbol,<strong>Function</strong>，本文说到的bind方法就是针对function而说的。<a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/bind">bind方法详解</a></p>
+                        </blockquote>
+                        <p>bind既然是方法，就少不了它的调用者，方法的参数，返回值。关于bind方法的实现这里不做学习，因为我没有了解到。首先bind方法只能被方法调用，方法的参数为this,args(一个可变参数)。返回值是bind方法的调用者的一个copy，还是一个方法，多的东西是this参数指定方法执行的作用域和agrs参数提供的默认参数。下面说一下bind的基本用法和使用场景</p>
+                        <ol>
+                        <li><p>基本使用</p>
+                        <pre><code class="lang-javascript">// 初始化一个对象，包含一个字符串和一个方法
+                         let person = {
+                             name: '小明',
+                             getName: function () {
+                                 return this.name;
+                             }
+                         };
+                         console.log(person.getName());//小明
+                        
+                         //将person中的getName方法赋值给一个变量,此时执行getName方法时，默认的作用域为变量getName所在的作用域
+                         let getName = person.getName;
+                         console.log(getName());//undefined
+                        
+                         //使用bind方法，返回一个新的getName方法，传递的第一参数为person，将person中的作用域当作新方法执行的作用域
+                         let getNameBind = person.getName.bind(person);
+                         console.log(getNameBind()); //小明
+                        </code></pre>
+                        </li><li>偏函数<pre><code class="lang-javascript">//给一个方法绑定默认参数
+                         let add = function () {
+                             let arr = [...arguments];
+                             console.log(arr);//[ 10, 1, 100, 1000 ]
+                             let temp = 0;
+                             for (let it of arr) {
+                                 temp += it;
+                             }
+                             return temp;
+                         };
+                         //给add方法绑定一个默认参数,方法被调用时，该参数默认在第一位
+                         let addBind = add.bind(this, 10);
+                         //调用addBind方法
+                         let result = addBind(1, 100, 1000);
+                         console.log(result);//1111
+                        </code></pre>
+                        </li><li>在setTimeout方法中使用<pre><code class="lang-javascript"> /**
+                          * setTimeout方法类似一个异步方法，简单说下nodejs中的回调函数，方法由上至下执行，遇到有回调函数的地方，不等待，继续往下，同时将回调函数
+                          *挂载到事件队列中，最后执行，此时回调函数中的上下文为global,使用bind方法可以绑定方法执行的上下文,也就是this对象 
+                         * */
+                         let Flower = function () {
+                             //在flower对象中定义一个time变量，值为一个随机数
+                             this.time = (Math.random() + 1) * 10;
+                         };
+                         //在Flower的原型链上添加一个方法run,其中有一个setTimeout方法
+                         Flower.prototype.run = function () {
+                             //创建一个Flower的实例，调用flowering方法的bind方法，因为run方法为Flower原型链上的方法，this为该对象的实例
+                             setTimeout(this.flowering.bind(this), 1000);//2 flower is bind,time is 16.19463530267282
+                             setTimeout(this.flowering, 1000);//3 flower is bind,time is undefined
+                             console.log('----------------');//1 ----------------
+                         }
+                         //在Flower的原型链上添加一个方法flowering，返回的字符串中包含this对象中的属性
+                         Flower.prototype.flowering = function () {
+                             console.log(flower is bind,time is this.time);
+                         }
+                         //执行
+                         new Flower().run();
+                        </code></pre>
+                        <h2 id="h2-u7ED3u8BED"><a name="结语" class="reference-link"></a><span class="header-link octicon octicon-link"></span>结语</h2>这里只是说下javaScript中bind方法的简单用法，虽然在平常的开发过程中也行用到的场景比较少，但是在一个封装的公共方法或者是一些开源类库中经常被使用。</li></ol>
+                        `,
+                        "digest": '暂时没有摘要信息',
+                        "show_cover_pic": 1,
+                    }
+                        //若新增的是多图文素材，则此处应还有几段articles结构
+                    ]
+                };
+                //6_lVDZvy4-qHtTlsHaTYg_cgm-MyqSvMyG-TmhBvySxo5hQTbQ99qxsw8-DCCa2O
+                response = await messageManage.uploadnews(temp);
+                console.log(JSON.stringify(response));
+            case '15':
+                //6_lVDZvy4-qHtTlsHaTYg_cgm-MyqSvMyG-TmhBvySxo5hQTbQ99qxsw8-DCCa2O
+                //tEN6qEKn2cwBIhkD31S2Hw2fiCb-B6zCQ_pO2OVOMrgr5jDMtvE12a-OLuwyi0kp
+                temp = {
+                    "touser": "osck56IGPNFlSEGUkXhRDy1v1plM",
+                    "mpnews": {
+                        "media_id": "6_lVDZvy4-qHtTlsHaTYg_cgm-MyqSvMyG-TmhBvySxo5hQTbQ99qxsw8-DCCa2O"
+                    },
+                    "msgtype": "mpnews"
+                }
+                response = await messageManage.preview(temp);
+                console.log(JSON.stringify(response));
+            case '16':
+                //6_lVDZvy4-qHtTlsHaTYg_cgm-MyqSvMyG-TmhBvySxo5hQTbQ99qxsw8-DCCa2O
+                //tEN6qEKn2cwBIhkD31S2Hw2fiCb-B6zCQ_pO2OVOMrgr5jDMtvE12a-OLuwyi0kp
+                temp = {
+                    "filter": {
+                        "is_to_all": false,
+                        "tag_id": 2
+                    },
+                    "mpnews": {
+                        "media_id": "6_lVDZvy4-qHtTlsHaTYg_cgm-MyqSvMyG-TmhBvySxo5hQTbQ99qxsw8-DCCa2O"
+                    },
+                    "msgtype": "mpnews",
+                    "send_ignore_reprint": 0
+                };
+                response = await messageManage.batchSendByTag(temp);
+                console.log(JSON.stringify(response));
             default:
                 content = `额，你说的【${message.Content}】太复杂了!`
                 break;
+
         }
     } else {
         content = '你好，我是小爱同学，请问有什么可以帮助你的吗？';
