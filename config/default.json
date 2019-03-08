@@ -2,8 +2,8 @@
     "app": {
         "port": 8080,
         "token": "xiaolaoban",
-        "appID": "wx083e4cad18863060",
-        "appsecret": "a413d0e2b9d1bd43f7539b609e73d1c4",
+        "appID": "wxbd69ef4534f5a960",
+        "appsecret": "efb0727badc6365d07dce94bf6441ead",
         "preix": "https://api.weixin.qq.com/cgi-bin/"
     },
     "api": {}
